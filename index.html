@@ -7,7 +7,7 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="">
-    </head>
+         </head>
     <body>
         <h1 style="margin-bottom: 0%; margin-top: 10px;"> Backtracking</h1>
         <p style="margin-top: 0%;"> Copyright ©2002 by David Matuszek</p>
@@ -174,7 +174,7 @@
     scheme is simple enough, you should use it; but if it is too cumbersome, you 
     are better off keeping a list of untried children.</p>
   <p><b><br />
-    Example: TreeSearch</font></b></p>
+    Example: TreeSearch</b></p>
   <p>For starters, let's do the simplest possible example of backtracking, which 
     is searching an actual tree. We will also use the simplest kind of tree, a binary 
     tree.</p>
@@ -187,6 +187,232 @@
     a binary tree, we will say that a node might or might not be a goal node, and 
     will contain its name. The first example in this paper (which we repeat here) 
     shows a binary tree.</p>
-  </body></html>
+    <center><p><img src="firstimage.PNG"></p></center>
+    <p><b><br>
+      What are the children?</b></p>
+    <p>One of the things that simplifies the above binary tree search is that, at 
+      each choice point, you can ignore all the previous choices. Previous choices 
+      don't give you any information about what you should do next; as far as you 
+      know, both the left and the right child are possible solutions. In many problems, 
+      however, you may be able to eliminate children immediately, without recursion.</p>
+    <p>Consider, for example, the problem of four-coloring a map. It is a theorem 
+      of mathematics that any map on a plane, no matter how convoluted the countries 
+      are, can be colored with at most four colors, so that no two countries that 
+      share a border are the same color.</p>
+    <p>To color a map, you choose a color for the first country, then a color for 
+      the second country, and so on, until all countries are colored. There are two 
+      ways to do this:</p>
+    <ul>
+      <li><b>Method 1. </b>Try each of the four possible colors, and recur. When you 
+        run out of countries, check whether you are at a goal node.</li>
+      <li><b>Method 2. </b>Try only those colors that have not already been used for 
+        an adjacent country, and recur. If and when you run out of countries, you 
+        have successfully colored the map.</li>
+    </ul>
+    <p>Let's apply each of these two methods to the problem of coloring a checkerboard. 
+      This should be easily solvable; after all, a checkerboard only needs two colors.</p>
+    <p>In both methods, the colors are represented by integers, from<code> RED=1 </code>to<code> 
+      BLUE=4</code>. We define the following helper methods. The helper method code 
+      isn't displayed here because it's not important for understanding the method 
+      that does the backtracking.</p>
+    <dl> 
+      <dt><code>boolean mapIsOK()</code></dt>
+      <dd>Used by method 1 to check (at a leaf node) whether the entire map is colored 
+        correctly.
+        <br /><br />
+      </dd>
+      <dt><code>boolean okToColor(int row, int column, int color)</code></dt>
+      <dd>Used by method 2 to check, at every node, whether there is an adjacent node 
+        already colored with the given color.
+        <br /><br />
+      </dd>
+      <dt><code>int[] nextRowAndColumn(int row, int column)</code></dt>
+      <dd>Used by both methods to find the next "country" (actually, the 
+        row and column of the next square on the checkerboard).</dd>
+    </dl>
+    <p>Here's the code for method 1:</p>
+    <blockquote>
+      <pre>boolean explore1(int row, int column, int color) {
+        if (row &gt;= NUM_ROWS) <b>return mapIsOK()</b>;
+        map[row][column] = color;
+        for (int nextColor = RED; nextColor &lt;= BLUE; nextColor++) {
+            int[] next = nextRowAndColumn(row, column);
+            if (explore1(next[0], next[1], nextColor)) return true;
+        }
+        return false;
+    }</pre>
+    </blockquote>
+    <p>And here's the code for method 2:</p>
+    <blockquote>
+      <pre>boolean explore2(int row, int column, int color) {
+        if (row &gt;= NUM_ROWS) <b>return true</b>;
+        <b>if (okToColor(row, column, color)) {</b>
+            map[row][column] = color;
+            for (int nextColor = RED; nextColor &lt;= BLUE; nextColor++) {
+                int[] next = nextRowAndColumn(row, column);
+                if (explore2(next[0], next[1], nextColor)) return true;
+            }
+        }
+        return false;
+    }</pre>
+    </blockquote>
+    <p>Those appear pretty similar, and you might think they are equally good. However, 
+      the timing information suggests otherwise:</p>
+      <center><table border="1" cellpadding="2">
+        <tr>
+          <td></td>
+          <th>2 by 3 map</th>
+          <th>3 by 3 map</th>
+          <th>3 by 4 map</th>
+        </tr>
+        <tr>
+          <th>Method 1</th>
+          <td>60 ms.</td>
+          <td>940 ms.</td>
+          <td>60530 ms. (1 minute)</td>
+        </tr>
+        <tr>
+          <th>Method 2</th>
+          <td>0 ms.</td>
+          <td>0 ms.</td>
+          <td>0 ms.</td>
+        </tr>
+      </table></center>
+      <p><b><font size="+1"><br />
+        Example: Cindy's Puzzle</font></b></p>
+      <p>I call the following puzzle "Cindy's puzzle" for historical reasons. 
+        You have some number<code> n </code>of black marbles and the same number of 
+        white marbles, and you have a playing board which consists simply of a line 
+        of<code> 2n+1 </code>spaces to put the marbles in. Start with the black marbles 
+        all at one end (say, the left), the white marbles all at the other end, and 
+        a free space in between.</p>
+      <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+        <tbody><tr>
+          <td width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+          <td width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+          <td width="44">&nbsp;</td>
+          <td width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+          <td width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+        </tr>
+      </tbody></table>
+      <p>The goal is to reverse the positions of the marbles:</p>
+      <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+        <tbody><tr> 
+          <td width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+          <td width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+          <td width="44">&nbsp;</td>
+          <td width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+          <td width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+        </tr>
+      </tbody></table>
+      <p>The black marbles can only move to the right, and the white marbles can only 
+        move to the left (no backing up). At each move, a marble can either:</p>
+      <ul>
+        <li>Move one space ahead, if that space is clear, or</li>
+        <li>Jump ahead over exactly one marble of the opposite color, if the space just 
+          beyond that marble is clear.</li>
+      </ul>
+      <p>For example, you could make the following sequence of moves:</p>
+      <table align="center" border="0" cellpadding="8" cellspacing="0">
+        <tbody><tr> 
+          <td><b>Starting position:</b></td>
+          <td> 
+            <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+              <tbody><tr> 
+                <td width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td width="44">&nbsp;</td>
+                <td width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+                <td width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+              </tr>
+            </tbody></table>
+          </td>
+        </tr>
+        <tr> 
+          <td><b>Black moves ahead:</b></td>
+          <td> 
+            <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+              <tbody><tr> 
+                <td height="44" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44">&nbsp;</td>
+                <td height="44" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+              </tr>
+            </tbody></table>
+          </td>
+        </tr>
+        <tr> 
+          <td><b>White jumps:</b></td>
+          <td> 
+            <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+              <tbody><tr> 
+                <td height="44" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44">&nbsp;</td>
+                <td height="44" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+              </tr>
+            </tbody></table>
+          </td>
+        </tr>
+        <tr> 
+          <td><b>Black moves ahead:</b></td>
+          <td> 
+            <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+              <tbody><tr> 
+                <td height="44" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44">&nbsp;</td>
+                <td height="44" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+              </tr>
+            </tbody></table>
+          </td>
+        </tr>
+        <tr> 
+          <td><b>Black jumps:</b></td>
+          <td> 
+            <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+              <tbody><tr> 
+                <td height="44" width="44">&nbsp;</td>
+                <td height="44" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="44" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+              </tr>
+            </tbody></table>
+          </td>
+        </tr>
+        <tr> 
+          <td><b>White moves ahead:</b></td>
+          <td> 
+            <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+              <tbody><tr> 
+                <td height="59" width="44">&nbsp;</td>
+                <td height="59" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+                <td height="59" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="59" width="44"><img src="black-ball.gif" height="44" width="44" /></td>
+                <td height="59" width="44"><img src="white-ball.gif" height="44" width="44" /></td>
+              </tr>
+            </tbody></table>
+          </td>
+        </tr>
+        <tr> 
+          <td><b>Stuck!</b></td>
+          <td>&nbsp; </td>
+        </tr>
+      </tbody></table>
+        <p>Now to the program. The main program will initialize the board, and call a recursive backtracking routine to attempt to solve the puzzle. The backtracking routine will either succeed and print out a winning path, or it will fail, and the main program will have to print out the bad news.
+
+          The backtracking method is named solvable and returns a boolean. In solvable we shall need to check whether we are at a leaf, which in this case means a position from which no further moves are possible. This isn't so easy.
+          
+          Each possible move will result in a new board position, and these new board positions are the children of the current board position. Hence to find the children of a node (that is, of a board position), we need only find the possible moves from that node. Remember that it is also highly desirable to find an ordering on these possible moves.
+          
+          Here it is time to stop and take thought. To make progress, we must analyze the game to some extent. Probably a number of approaches would work, and what follows is based on the way I worked it out. If you were to program this puzzle, you might find a different but equally valid approach.
+          
+          First, notice that if a marble has a move, that move is unique: if it can move ahead one square, then it cannot jump. If it can jump, it cannot move ahead one square. This suggests that, to find the possible moves, we might assign numbers to the marbles, and check each marble in turn. When we have looked at all the marbles, we have looked at all the possible moves. This would require having a table to keep track of where each marble is, or else somehow "marking" each marble with its number and searching the board each time to find the marble we want. Neither alternative is very attractive.
+          
+          Next, notice that for a given board position, each marble occupies a unique space. Hence, instead of talking about moving a particular marble, we can talk about moving the marble in a particular space. If a move is possible from a given space, then that must be the only move possible from that space, because if the marble in that space has a move, it is unique. There is a slight complication because not every space contains a marble, but at least the spaces (unlike the marbles) stay in one place.</p>
     </body>
 </html>
